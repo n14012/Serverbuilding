@@ -110,8 +110,8 @@ vagrant reload で再起動して設定を反映。
 15.wget がインストールしてなかったので、sudo yum install wget でインストール。  
 16.wget が proxyを通るように、sudo vi /etc/wgetrc の中のコメントアウトされているプロキシ設定のコメントアウトを外し、172.16.40.1:8888を書き込む。  
 17.wget https://ja.wordpress.org/wordpress-4.0-ja.tar.gz コマンドで、wordpress　をダウンロード。  
-18.unzip wordpress-4.2.2-ja.zip で、wordpress を展開。展開して出てきた wordpress ディレクトリを/usr/share/nginx/html　の下に移動。  
-#### worfpress の設定
+18.tar zxvf wordpress-4.2.2-ja.zip で、wordpress を展開。展開して出てきた wordpress ディレクトリを/usr/share/nginx/html　の下に移動。  
+#### wordpress の設定
 19.wordpress ディレクトリの中の wp-config.sample.php を cp wp-config.sample.php wp-config.php コマンドで、名前を変えてコピー。  
 20.sudo vi wp-config.php コマンドで下記の設定を書き換える。  
     define('DB_NAME', 'wordpress');  
@@ -139,6 +139,107 @@ vagrant reload で再起動して設定を反映。
 #### php-5.5.25のインストール
 1.[PHP公式サイト](http://php.net/get/php-5.5.25.tar.gz/from/a/mirror) からphp-5.5.25.tar.gz をダウンロード。  
 2.cd Downloads/php-5.5.25.tar.gz vagrant_2-3 コマンドで、Downloads ディレクトリから、vagrantの作業ディレクトリへphp-5.5.25を移動。  
-3.CentOS65 側で、vagrant /vagrant/ ディレクトリへ移動して、移動してきたphp-5.5.25.tar.gzを tar zxvf php-5.5.25.tar.gzを展開。展開してできたディレクトリに移動して、./configure --apxs2=/usr/local/apache2/bin/apxs --with-mysql コマンドを実行。  
+3.CentOS65 側で、vagrant /vagrant/ ディレクトリへ移動して、移動してきたphp-5.5.25.tar.gzを tar zxvf php-5.5.25.tar.gzを展開。展開してできたディレクトリに移動して、./configure --with-apxs2=/usr/local/apache2/bin/apxs --with-mysql コマンドを実行。  
 6.sudo yum install libxml2-devel で足りなかったものをダウンロード。  
-7.make コマンドでコンパイルして、sudo make install コマンドでインストールする。  
+7.make コマンドでコンパイルして、sudo make install コマンドでインストールする。 
+8.cp php-5.5.25/php.ini-development /usr/local/lib/php.ini コマンドでファイルをコピーする。  
+9.http://php.net/mysql.default-socketを/　で検索して、その下にあるmysql.default_socket = の横に以下のように追記。  
+   mysql.default_socket = /var/lib/mysql/mysql.sock  
+#### mysql のインストール
+1.sudo yum install mysql mysql-server コマンドでmysqlをインストール。  
+2.mysqlを起動して、CREATE DATABASE Wordpressコマンドでデータベースを作成。  
+3.GRANT ALL ON Wordpress.* TO n14012@localhost IDENTIFIED BY 'password';でユー>ザを作成し、パスワードを設定する。
+#### wordpress の準備
+1.2-2の手順と同様にインストールする。  
+2.wordpress は /usr/share/nginx/html/　に置く。  
+
+#### wordpress にインストール
+192.168.56.129/wordpress/wp-admin/install.php　にアクセスして、インストール。
+### 2-4 ベンチマークを取る
+#### ab コマンドのインストール
+sudo yum -y install apache2-util　コマンドでインストールする。
+#### wordpress の高速化
+1.[Wordpress.org](https://wordpress.org/plugins/wp-super-cache/)でwp-super-cacheプラグインをダウンロード。
+2./usr/share/nginx/html/wordpress/wp-content/　のところに、mkdir uploadsコマンドで、ディレクトリを作り、chmod 777 uploads　コマンドで、サーバーに実行権限を与える。
+3.sudo chown -R nginx:nginx /usr/share/nginx/html/　コマンドで、nginxにwordpressの権限を与える。
+4.ダウンロードしたzipファイルを、wordpress のプラグインアップロード画面で読み込んで、インストール。
+#### ab　コマンドの実行
+プラグインを無効化にした状態で、 ab  -c 1000 -n 1000 http://192.168.56.129/wordpress コマンドで測定、その後有効化して測定して、結果を比較する。
+#### プラグイン追加前 wordpress
+Server Software:        nginx/1.0.15  
+Server Hostname:        192.168.56.129  
+Server Port:            80  
+  
+Document Path:          /wordpress  
+Document Length:        185 bytes  
+  
+Concurrency Level:      1000  
+Time taken for tests:   0.690 seconds  
+Complete requests:      1000  
+Failed requests:        0  
+Non-2xx responses:      1000  
+Total transferred:      387000 bytes  
+HTML transferred:       185000 bytes  
+Requests per second:    1448.87 [#/sec] (mean)  
+Time per request:       690.191 [ms] (mean)  
+Time per request:       0.690 [ms] (mean, across all concurrent requests)  
+Transfer rate:          547.57 [Kbytes/sec] received  
+  
+Connection Times (ms)  
+              min  mean[+/-sd] median   max  
+Connect:        0   24  17.2     24      67  
+Processing:     8  197 168.8    236     642  
+Waiting:        8  196 169.6    236     641  
+Total:         14  221 179.4    259     674  
+  
+Percentage of the requests served within a certain time (ms)  
+  50%    259  
+  66%    286  
+  75%    303  
+  80%    309  
+  90%    346  
+  95%    668  
+  98%    672  
+  99%    672  
+ 100%    674 (longest request)  
+  
+#### プラグイン追加後
+
+Server Software:        nginx/1.0.15  
+Server Hostname:        192.168.56.129  
+Server Port:            80  
+  
+Document Path:          /wordpress  
+Document Length:        185 bytes  
+  
+Concurrency Level:      1000  
+Time taken for tests:   1.041 seconds  
+Complete requests:      1000  
+Failed requests:        0  
+Non-2xx responses:      1000  
+Total transferred:      387000 bytes  
+HTML transferred:       185000 bytes  
+Requests per second:    960.43 [#/sec] (mean)  
+Time per request:       1041.195 [ms] (mean)  
+Time per request:       1.041 [ms] (mean, across all concurrent requests)  
+Transfer rate:          362.98 [Kbytes/sec] received  
+  
+Connection Times (ms)  
+              min  mean[+/-sd] median   max  
+Connect:        1   22   9.4     21      38  
+Processing:    15  368 287.2    283     983  
+Waiting:       15  366 288.0    281     982  
+Total:         21  390 294.0    302    1021  
+  
+Percentage of the requests served within a certain time (ms)  
+  50%    302  
+  66%    501  
+  75%    521  
+  80%    525  
+  90%    943  
+  95%   1007  
+  98%   1019  
+  99%   1021  
+ 100%   1021 (longest request)  
+   
+ある程度の改善が見られた。
