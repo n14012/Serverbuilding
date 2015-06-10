@@ -243,3 +243,12 @@ Percentage of the requests served within a certain time (ms)
  100%   1021 (longest request)  
    
 ある程度の改善が見られた。
+
+### Section 5-1 bindのインストール
+
+1.git clone http://github.com/cloneko/serverbuilding-2015/ コマンドで先生のファイルをclone  
+2.vagrant plugin install vagrant-proxyconf
+　vagrant plugin install vagrant-vbguest  コマンドでプラグインをインストールした後、何も考えずにvagrant up  
+
+#### 5-2 bindの設定
+
