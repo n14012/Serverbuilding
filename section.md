@@ -15,9 +15,11 @@
 ### CentOSのインストール
 1.CentOS公式サイトからCentOSをダウンロード。  
 2.virtualboxを起動して、新規のところからメモリサイズ1GB、ストレージを8GBに設定してCentOSをインストール。インストール中に管理者ユーザーを作成。  
-3.ネットワークアダプタ２を設定したつもりが設定できていなかったことに気づいてホストオンリーアダプターで設定。  
+3.ネ
+ットワークアダプタ２を設定したつもりが設定できていなかったことに気づいてホストオンリーアダプターで設定。  
 
 ### ネットワークアダプター1/2へのIPアドレスの設定とssh接続の確認
+
 
 1.とりあえずCentOSを起動し、cd　/etc/sysconfig/network-scriptに移動。ifcfg-enp0s3ファイルと、RedHatマニュアルを見ながら色々書き換えた。結局ONBOOT=yesにしただけ  
 2.書き換えたけどうまくいかなかったのでいささんに助けを求めてifcfg-enp0s8我あることを知り、0s3の中身をそのままcpして0s8を作成。  
@@ -124,10 +126,12 @@ vagrant reload で再起動して設定を反映。
 23.service nginx restart でnginxを再起動。  
 24.service php-fpm start でphp-fpmを起動。  
 25.service mysql start でMariaDBを起動。  
-#### wordpress 確認
-26. 192.168.56.129/wordpress/wp-admin/install.php にアクセス。必要事項を記入して登録し、wordpress をインストール。index.phpのページを表示できるか確認。  
-### 2-3 wordpressを動かす(3)
-#### apache のインストール
+#### wordpress 確認  
+1.192.168.56.129/wordpress/wp-admin/install.php にアクセス。必要事項を記入して登録し、wordpress をインストール。index.phpのページを表示できるか確認。  
+
+### 2-3 wordpressを動かす(3)  
+
+#### apache のインストール  
 1.wget http://www.apache.org/dist/apr/apr-1.5.2.tar.gz コマンドで必要なファイルをダウンロードして準備する。  
 2.tar zxvf httpd-2.2.29.tar.gz コマンドで展開。展開したディレクトリに移動し、./configure コマンドを実行。  
 3.make コマンドでコンパイルして、 make install コマンドでインストール。  
@@ -136,7 +140,7 @@ vagrant reload で再起動して設定を反映。
     ./configure --with-apr=/usr/local/apr  
 6.wget http://www.apache.org/dist/httpd/httpd-2.2.29.tar.gz コマンドでいよいよapacheのインストールです。  
 7.こっちも前のと同じ手順で進める。  
-#### php-5.5.25のインストール
+#### php-5.5.25のインストール  
 1.[PHP公式サイト](http://php.net/get/php-5.5.25.tar.gz/from/a/mirror) からphp-5.5.25.tar.gz をダウンロード。  
 2.cd Downloads/php-5.5.25.tar.gz vagrant_2-3 コマンドで、Downloads ディレクトリから、vagrantの作業ディレクトリへphp-5.5.25を移動。  
 3.CentOS65 側で、vagrant /vagrant/ ディレクトリへ移動して、移動してきたphp-5.5.25.tar.gzを tar zxvf php-5.5.25.tar.gzを展開。展開してできたディレクトリに移動して、./configure --with-apxs2=/usr/local/apache2/bin/apxs --with-mysql コマンドを実行。  
@@ -145,27 +149,27 @@ vagrant reload で再起動して設定を反映。
 8.cp php-5.5.25/php.ini-development /usr/local/lib/php.ini コマンドでファイルをコピーする。  
 9.http://php.net/mysql.default-socketを/　で検索して、その下にあるmysql.default_socket = の横に以下のように追記。  
    mysql.default_socket = /var/lib/mysql/mysql.sock  
-#### mysql のインストール
+#### mysql のインストール  
 1.sudo yum install mysql mysql-server コマンドでmysqlをインストール。  
 2.mysqlを起動して、CREATE DATABASE Wordpressコマンドでデータベースを作成。  
 3.GRANT ALL ON Wordpress.* TO n14012@localhost IDENTIFIED BY 'password';でユー>ザを作成し、パスワードを設定する。
-#### wordpress の準備
+#### wordpress の準備  
 1.2-2の手順と同様にインストールする。  
 2.wordpress は /usr/share/nginx/html/　に置く。  
 
-#### wordpress にインストール
+#### wordpress にインストール  
 192.168.56.129/wordpress/wp-admin/install.php　にアクセスして、インストール。
-### 2-4 ベンチマークを取る
-#### ab コマンドのインストール
+### 2-4 ベンチマークを取る  
+#### ab コマンドのインストール  
 sudo yum -y install apache2-util　コマンドでインストールする。
-#### wordpress の高速化
+#### wordpress の高速化  
 1.[Wordpress.org](https://wordpress.org/plugins/wp-super-cache/)でwp-super-cacheプラグインをダウンロード。
 2./usr/share/nginx/html/wordpress/wp-content/　のところに、mkdir uploadsコマンドで、ディレクトリを作り、chmod 777 uploads　コマンドで、サーバーに実行権限を与える。
 3.sudo chown -R nginx:nginx /usr/share/nginx/html/　コマンドで、nginxにwordpressの権限を与える。
 4.ダウンロードしたzipファイルを、wordpress のプラグインアップロード画面で読み込んで、インストール。
-#### ab　コマンドの実行
+#### ab　コマンドの実行  
 プラグインを無効化にした状態で、 ab  -c 1000 -n 1000 http://192.168.56.129/wordpress コマンドで測定、その後有効化して測定して、結果を比較する。
-#### プラグイン追加前 wordpress
+#### プラグイン追加前 wordpress  
 Server Software:        nginx/1.0.15  
 Server Hostname:        192.168.56.129  
 Server Port:            80  
@@ -203,7 +207,7 @@ Percentage of the requests served within a certain time (ms)
   99%    672  
  100%    674 (longest request)  
   
-#### プラグイン追加後
+#### プラグイン追加後  
 
 Server Software:        nginx/1.0.15  
 Server Hostname:        192.168.56.129  
