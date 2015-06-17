@@ -270,11 +270,15 @@ Percentage of the requests served within a certain time (ms)
     www.conf
 ### Section 3-1-2  VagrantfileからAnsibleを呼び出す  
 
-1.下記をVagrantfileに
+1.下記をVagrantfileに追記する。  
+
     config.vm.provision "ansible" do |ansible|
     ansible.playbook = "playbook.yml"                                       
     end
+2.何も考えずに  
 
+    vagrant up  
+  
 ### Section 5-1 bindのインストール
 
 
