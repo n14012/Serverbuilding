@@ -3,8 +3,9 @@
 ### 6-0 AWSコマンドラインインターフェースのインストール
 
 1. 以下のコマンドで、awscliをダウンロード。
-    sudo apt-get install python-pip
-    pip install awscli
+    sudo apt-get install python-pip  
+    pip install awscli  
+
 ### 6-1 AWS EC2 + Ansible
 
 1.  
@@ -51,7 +52,7 @@
 ### Section 6-2 AWS EC2(AMIMOTO)  
 
 1.インスタンスを新たに作成する際にAWS Marketplace を選択し、検索欄にamimoto　と入力して検索する。  
-2.PVM と HHVM が出てくるので、HHVM を選択。 
+2.PVM と HHVM が出てくるので、HHVM を選択。   
 3.そのまま確認と作成を押して作成すると、エラーが出て作成できないので、セキュリティグループの編集から説明に書かれている日本語の説明文を消して、英語でわかりやすい説文に書き換える。  
 4.すると無事に作成出来るので、パブリックIPをコピーして、下記のコマンドでターミナルからsshする。  
 
@@ -60,7 +61,7 @@
 5.無事にsshでamimotoにログインが確認できたらおk。  
 6.後はパブリックIPをURLにぶち込んでwordpressがインストールできたら終わり。  
 
-### Section 6-3 Route53  
+### Section 6-3 Route53   
 
 1.Route53のページを開き、Hosted Zone を開いて、Create Hosted Zone でDomain Name と Commentにわかりやすい名前で記入して Create する。  
 2.5-1で作ったzoneファイルの中身をcatコマンドで開き、コピーする。  
@@ -76,4 +77,81 @@
     aws s3 cp 作ったhtmlファイル s3://バケット名/  
     
 4.S3の自分のバケットのページで更新をかけて、うpったファイルが確認できればおk。  
- 
+
+### Section 6-5 CloudFront  
+
+1.6-1で作ったAMIを選択し、インスタンスを起動。  
+2.Cloud frontのページを開いて、Create Distribution!!!!!!!!!!  
+3.delivery method は、webを選択する。  
+4.さっきAMIで起動した、インスタンスのパブリックDNSをコピーして、orgin dmain name のところに貼り付けて、Create Distribution!!!!!!!!!!!!!  
+5.Distribution一覧を開いて、statusがIn Progなんちゃらから、Deployedになるまで待つ。。。。ひたすら待つ。  
+6.Deployedになったら、dmain name をコピーしてURLにぶっこんで、サイトが表示されるかを確認。  
+7.abコマンドで速度を比べますが、プロキシでなんか負荷がかかるらしいので、sshしてそこで実行します。  
+
+    ssh n14012@172.16.40.2  
+
+8.コマンドで速度をはかりますます。  
+    ab http://ec2-52-69-97-182.ap-northeast-1.compute.amazonaws.com/  
+
+インスタンス ベンチ結果  
+
+```
+Server Software:        nginx/1.6.2
+Server Hostname:        ec2-52-69-97-182.ap-northeast-1.compute.amazonaws.com
+Server Port:            80
+
+Document Path:          /
+Document Length:        8902 bytes
+
+Concurrency Level:      1
+Time taken for tests:   0.213 seconds
+Complete requests:      1
+Failed requests:        0
+Total transferred:      9109 bytes
+HTML transferred:       8902 bytes
+Requests per second:    4.70 [#/sec] (mean)
+Time per request:       212.879 [ms] (mean)
+Time per request:       212.879 [ms] (mean, across all concurrent requests)
+Transfer rate:          41.79 [Kbytes/sec] received
+
+Connection Times (ms)
+              min  mean[+/-sd] median   max
+              Connect:       34   34   0.0     34      34
+              Processing:   179  179   0.0    179     179
+              Waiting:      170  170   0.0    170     170
+              Total:        213  213   0.0    213     213
+```
+
+    ab http://d1rv8hyj9d4tqt.cloudfront.net/  
+
+cloud front ベンチ結果  
+
+```
+Server Software:        CloudFront
+Server Hostname:        d1rv8hyj9d4tqt.cloudfront.net
+Server Port:            80
+
+Document Path:          /http://d1rv8hyj9d4tqt.cloudfront.net/
+Document Length:        622 bytes
+
+Concurrency Level:      1
+Time taken for tests:   0.058 seconds
+Complete requests:      1
+Failed requests:        0
+Non-2xx responses:      1
+Total transferred:      944 bytes
+HTML transferred:       622 bytes
+Requests per second:    17.10 [#/sec] (mean)
+Time per request:       58.478 [ms] (mean)
+Time per request:       58.478 [ms] (mean, across all concurrent requests)
+Transfer rate:          15.76 [Kbytes/sec] received
+
+Connection Times (ms)
+              min  mean[+/-sd] median   max
+              Connect:       29   29   0.0     29      29
+              Processing:    30   30   0.0     30      30
+              Waiting:       29   29   0.0     29      29
+              Total:         58   58   0.0     58      58
+```
+  
+
