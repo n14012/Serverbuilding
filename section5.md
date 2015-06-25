@@ -13,14 +13,14 @@
 #### 5-2 bindの設定  
   
 1. zoneファイルを編集。先生の用意してたclonekoの部分を自分の学籍番号に書き換える。  
-    IN SOA ns.n14012.com. ewe.n14012.com.   
-    
+        IN SOA ns.n14012.com. ewe.n14012.com.
              IN      NS      ns.n14012.com.
              IN      MX      10      aspmx.l.google.com.
              IN      NS      ns2.n14012.com.
-     www     IN      A       172.16.40.70
-     ns      IN      A       172.16.40.70
-     ns2     IN      A       172.16.40.71
+     www     IN      A       172.16.40.70  
+     ns      IN      A       172.16.40.70  
+     ns2     IN      A       172.16.40.71  
+
   
 2. slave-named.confファイルを編集。以下の部分をzoneファイルに書いた学籍番号に書き換える。  
 
